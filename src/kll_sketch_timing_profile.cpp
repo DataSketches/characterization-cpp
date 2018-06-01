@@ -3,122 +3,37 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-#include <kll_sketch.hpp>
+#include "kll_sketch_timing_profile.h"
+
 #include <iostream>
 #include <algorithm>
-#include <cmath>
 #include <random>
 #include <chrono>
 #include <sstream>
-#include <cstring>
 
-/*
- * Computes the next larger integer point in the power series
- * <i>point = 2<sup>( i / ppo )</sup></i> given the current point in the series.
- * For illustration, this can be used in a loop as follows:
- *
- * <pre>{@code
- *     int maxP = 1024;
- *     int minP = 1;
- *     int ppo = 2;
- *
- *     for (int p = minP; p <= maxP; p = pwr2LawNext(ppo, p)) {
- *       System.out.print(p + " ");
- *     }
- *     //generates the following series:
- *     //1 2 3 4 6 8 11 16 23 32 45 64 91 128 181 256 362 512 724 1024
- * }</pre>
- *
- * param ppo Points-Per-Octave, or the number of points per integer powers of 2 in the series.
- * param curPoint the current point of the series. Must be &ge; 1.
- * returns the next point in the power series.
- */
-size_t pwr_2_law_next(size_t ppo, size_t cur_point) {
-  const size_t cur = (cur_point < 1) ? 1 : cur_point;
-  size_t gi(round(log2(cur) * ppo)); //current generating index
-  size_t next;
-  do {
-    next = (size_t) round(pow(2.0, (double) ++gi / ppo));
-  } while ( next <= cur_point);
-  return next;
+#include <kll_sketch.hpp>
+
+namespace sketches {
+
+size_t pwr_2_law_next(size_t ppo, size_t cur_point);
+size_t count_points(size_t lg_start, size_t lg_end, size_t ppo);
+
+size_t get_num_trials(size_t x, size_t lg_min_x, size_t lg_max_x, size_t lg_min_trials, size_t lg_max_trials) {
+  const double slope((double) (lg_max_trials - lg_min_trials) / ((int) lg_min_x - (int) lg_max_x));
+  const double lg_trials((slope * log2(x)) + lg_max_trials);
+  return (size_t) pow(2, lg_trials);
 }
 
-/*
- * Counts the actual number of plotting points between lgStart and lgEnd assuming the given PPO.
- * This is not a simple linear function due to points that may be skipped in the low range.
- * param lgStart Log2 of the starting value
- * param lgEnd Log2 of the ending value
- * param ppo the number of logrithmically evenly spaced points per octave.
- * returns the actual number of plotting points between lgStart and lgEnd.
- */
-size_t count_points(size_t lg_start, size_t lg_end, size_t ppo) {
-  size_t p(1 << lg_start);
-  const size_t end(1 << lg_end);
-  size_t count(0);
-  while (p <= end) {
-    p = pwr_2_law_next(ppo, p);
-    count++;
-  }
-  return count;
+kll_sketch_timing_profile::kll_sketch_timing_profile() {
+  // TODO Auto-generated constructor stub
+
 }
 
-double accuracy_trial(float* values, size_t stream_length) {
-  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-  std::shuffle(values, values + stream_length, std::default_random_engine(seed));
-
-  sketches::kll_sketch sketch;
-  for (size_t i = 0; i < stream_length; i++) sketch.update(values[i]);
-
-  double max_rank_error = 0;
-  for (size_t i = 0; i < stream_length; i++) {
-    double true_rank = (double) i / stream_length;
-    double est_rank = sketch.get_rank(i);
-    max_rank_error = std::max(max_rank_error, abs(true_rank - est_rank));
-  }
-
-  return max_rank_error;
+kll_sketch_timing_profile::~kll_sketch_timing_profile() {
+  // TODO Auto-generated destructor stub
 }
 
-void accuracy(void) {
-  const size_t lg_min(0);
-  const size_t lg_max(23);
-  const size_t ppo(16);
-  const size_t num_trials(100);
-  const size_t error_pct(99);
-
-  double rank_errors[num_trials];
-
-  size_t max_len(1 << lg_max);
-  float* values = new float[max_len];
-
-  const size_t num_steps = count_points(lg_min, lg_max, ppo);
-  size_t stream_length(1 << lg_min);
-  for (size_t i = 0; i < num_steps; i++) {
-    for (size_t i = 0; i < stream_length; i++) values[i] = i;
-
-    for (size_t t = 0; t < num_trials; t++) {
-      const double maxRankErrorInTrial = accuracy_trial(values, stream_length);
-      rank_errors[t] = maxRankErrorInTrial;
-    }
-
-    std::sort(&rank_errors[0], &rank_errors[num_trials]);
-    const size_t error_pct_index = num_trials * error_pct / 100;
-    const double rank_error = rank_errors[error_pct_index];
-
-    std::cout << stream_length << "\t" << rank_error * 100 << std::endl;
-
-    stream_length = pwr_2_law_next(ppo, stream_length);
-  }
-  delete [] values;
-}
-
-size_t getNumTrials(size_t x, size_t lgMinX, size_t lgMaxX, size_t lgMinTrials, size_t lgMaxTrials) {
-  const double slope = (double) (lgMaxTrials - lgMinTrials) / ((int) lgMinX - (int) lgMaxX);
-  const double lgTrials = (slope * log2(x)) + lgMaxTrials;
-  return (size_t) pow(2, lgTrials);
-}
-
-void timing(void) {
+void kll_sketch_timing_profile::run() {
   const size_t lg_min_stream_len(0);
   const size_t lg_max_stream_len(23);
   const size_t ppo(16);
@@ -157,7 +72,7 @@ void timing(void) {
     size_t num_retained(0);
     size_t size_bytes(0);
 
-    const size_t num_trials = getNumTrials(stream_length, lg_min_stream_len, lg_max_stream_len, lg_min_trials, lg_max_trials);
+    const size_t num_trials = get_num_trials(stream_length, lg_min_stream_len, lg_max_stream_len, lg_min_trials, lg_max_trials);
     for (size_t i = 0; i < num_trials; i++) {
       for (size_t i = 0; i < stream_length; i++) values[i] = distribution(generator);
 
@@ -222,17 +137,4 @@ void timing(void) {
   delete [] values;
 }
 
-int main(int argc, char **argv) {
-  if (argc == 2) {
-    if (strcmp(argv[1], "accuracy") == 0) {
-      accuracy();
-    } else if (strcmp(argv[1], "timing") == 0) {
-      timing();
-    } else {
-      std::cerr << "Unsupported command " << argv[1] << std::endl;
-    }
-  } else {
-    std::cerr << "Only one parameter expected: accuracy or timing" << std::endl;
-  }
-  return 0;
-}
+} /* namespace sketches */
