@@ -17,7 +17,7 @@ double kll_sketch_accuracy_profile::run_trial(float* values, unsigned stream_len
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   std::shuffle(values, values + stream_length, std::default_random_engine(seed));
 
-  sketches::kll_sketch sketch;
+  sketches::kll_sketch<float> sketch;
   for (size_t i = 0; i < stream_length; i++) sketch.update(values[i]);
 
   double max_rank_error = 0;

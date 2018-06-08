@@ -10,8 +10,6 @@ namespace sketches {
 
 class kll_sketch_timing_profile {
 public:
-  kll_sketch_timing_profile();
-  virtual ~kll_sketch_timing_profile();
   virtual void run();
 };
 

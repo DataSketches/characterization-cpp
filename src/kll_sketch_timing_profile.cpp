@@ -24,15 +24,6 @@ size_t get_num_trials(size_t x, size_t lg_min_x, size_t lg_max_x, size_t lg_min_
   return (size_t) pow(2, lg_trials);
 }
 
-kll_sketch_timing_profile::kll_sketch_timing_profile() {
-  // TODO Auto-generated constructor stub
-
-}
-
-kll_sketch_timing_profile::~kll_sketch_timing_profile() {
-  // TODO Auto-generated destructor stub
-}
-
 void kll_sketch_timing_profile::run() {
   const size_t lg_min_stream_len(0);
   const size_t lg_max_stream_len(23);
@@ -77,7 +68,7 @@ void kll_sketch_timing_profile::run() {
       for (size_t i = 0; i < stream_length; i++) values[i] = distribution(generator);
 
       auto start_build(std::chrono::high_resolution_clock::now());
-      sketches::kll_sketch sketch;
+      sketches::kll_sketch<float> sketch;
       auto finish_build(std::chrono::high_resolution_clock::now());
       build_time_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(finish_build - start_build);
 
@@ -97,7 +88,9 @@ void kll_sketch_timing_profile::run() {
       get_quantiles_time_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(finish_get_quantiles - start_get_quantiles);
 
       auto start_get_rank(std::chrono::high_resolution_clock::now());
-      for (size_t i = 0; i < num_queries; i++) sketch.get_rank(rank_query_values[i]);
+      for (size_t i = 0; i < num_queries; i++) {
+        volatile double rank = sketch.get_rank(rank_query_values[i]); // volatile to prevent this from being optimized away
+      }
       auto finish_get_rank(std::chrono::high_resolution_clock::now());
       get_rank_time_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(finish_get_rank - start_get_rank);
 
@@ -113,7 +106,7 @@ void kll_sketch_timing_profile::run() {
       serialize_time_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(finish_serialize - start_serialize);
 
       auto start_deserialize(std::chrono::high_resolution_clock::now());
-      auto sketch_ptr(sketches::kll_sketch::deserialize(s));
+      auto sketch_ptr(sketches::kll_sketch<float>::deserialize(s));
       auto finish_deserialize(std::chrono::high_resolution_clock::now());
       deserialize_time_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(finish_deserialize - start_deserialize);
 

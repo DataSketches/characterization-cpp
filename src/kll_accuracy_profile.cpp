@@ -47,7 +47,7 @@ size_t pwr_2_law_next(size_t ppo, size_t cur_point) {
  * This is not a simple linear function due to points that may be skipped in the low range.
  * param lgStart Log2 of the starting value
  * param lgEnd Log2 of the ending value
- * param ppo the number of logrithmically evenly spaced points per octave.
+ * param ppo the number of logarithmically evenly spaced points per octave.
  * returns the actual number of plotting points between lgStart and lgEnd.
  */
 size_t count_points(size_t lg_start, size_t lg_end, size_t ppo) {
