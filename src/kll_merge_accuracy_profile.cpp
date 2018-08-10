@@ -11,16 +11,16 @@
 
 #include <kll_sketch.hpp>
 
-namespace sketches {
+namespace datasketches {
 
 double kll_merge_accuracy_profile::run_trial(float* values, unsigned stream_length) {
   unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   std::shuffle(values, values + stream_length, std::default_random_engine(seed));
 
   const unsigned num_sketches(8);
-  std::unique_ptr<sketches::kll_sketch<float>> sketches[num_sketches];
+  std::unique_ptr<kll_sketch<float>> sketches[num_sketches];
   for (unsigned i = 0; i < num_sketches; i++) {
-    sketches[i] = std::unique_ptr<sketches::kll_sketch<float>>(new sketches::kll_sketch<float>());
+    sketches[i] = std::unique_ptr<kll_sketch<float>>(new kll_sketch<float>());
   }
 
   unsigned j(0);
@@ -30,10 +30,10 @@ double kll_merge_accuracy_profile::run_trial(float* values, unsigned stream_leng
     if (j == num_sketches) j = 0;
   }
 
-  sketches::kll_sketch<float> sketch_tmp(32*200);
+  kll_sketch<float> sketch_tmp(32*200);
   for (unsigned i = 0; i < num_sketches; i++) sketch_tmp.merge(*sketches[i]);
 
-  sketches::kll_sketch<float> sketch;
+  kll_sketch<float> sketch;
   sketch.merge(sketch_tmp);
 
   double max_rank_error = 0;
@@ -46,4 +46,4 @@ double kll_merge_accuracy_profile::run_trial(float* values, unsigned stream_leng
   return max_rank_error;
 }
 
-} /* namespace sketches */
+} /* namespace datasketches */

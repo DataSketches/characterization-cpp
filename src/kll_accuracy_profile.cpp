@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace sketches {
+namespace datasketches {
 
 /*
  * Computes the next larger integer point in the power series
@@ -94,4 +94,4 @@ void kll_accuracy_profile::run() {
   delete [] values;
 }
 
-} /* namespace sketches */
+} /* namespace datasketches */

@@ -8,13 +8,13 @@
 
 #include "kll_accuracy_profile.h"
 
-namespace sketches {
+namespace datasketches {
 
 class kll_sketch_accuracy_profile: public kll_accuracy_profile {
 public:
   virtual double run_trial(float* values, unsigned stream_length);
 };
 
-} /* namespace sketches */
+} /* namespace datasketches */
 
 #endif /* KLL_SKETCH_ACCURACY_PROFILE_H_ */

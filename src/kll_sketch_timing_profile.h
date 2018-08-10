@@ -6,13 +6,13 @@
 #ifndef KLL_SKETCH_TIMING_PROFILE_H_
 #define KLL_SKETCH_TIMING_PROFILE_H_
 
-namespace sketches {
+namespace datasketches {
 
 class kll_sketch_timing_profile {
 public:
   virtual void run();
 };
 
-} /* namespace sketches */
+} /* namespace datasketches */
 
 #endif /* KLL_SKETCH_TIMING_PROFILE_H_ */

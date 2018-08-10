@@ -6,7 +6,7 @@
 #ifndef KLL_ACCURACY_PROFILE_H_
 #define KLL_ACCURACY_PROFILE_H_
 
-namespace sketches {
+namespace datasketches {
 
 class kll_accuracy_profile {
 public:
@@ -14,6 +14,6 @@ public:
   virtual double run_trial(float* values, unsigned stream_length) = 0;
 };
 
-} /* namespace sketches */
+} /* namespace datasketches */
 
 #endif /* KLL_ACCURACY_PROFILE_H_ */

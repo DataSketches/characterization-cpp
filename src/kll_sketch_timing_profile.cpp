@@ -13,7 +13,7 @@
 
 #include <kll_sketch.hpp>
 
-namespace sketches {
+namespace datasketches {
 
 size_t pwr_2_law_next(size_t ppo, size_t cur_point);
 size_t count_points(size_t lg_start, size_t lg_end, size_t ppo);
@@ -68,7 +68,7 @@ void kll_sketch_timing_profile::run() {
       for (size_t i = 0; i < stream_length; i++) values[i] = distribution(generator);
 
       auto start_build(std::chrono::high_resolution_clock::now());
-      sketches::kll_sketch<float> sketch;
+      kll_sketch<float> sketch;
       auto finish_build(std::chrono::high_resolution_clock::now());
       build_time_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(finish_build - start_build);
 
@@ -106,7 +106,7 @@ void kll_sketch_timing_profile::run() {
       serialize_time_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(finish_serialize - start_serialize);
 
       auto start_deserialize(std::chrono::high_resolution_clock::now());
-      auto sketch_ptr(sketches::kll_sketch<float>::deserialize(s));
+      auto sketch_ptr(kll_sketch<float>::deserialize(s));
       auto finish_deserialize(std::chrono::high_resolution_clock::now());
       deserialize_time_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(finish_deserialize - start_deserialize);
 
@@ -130,4 +130,4 @@ void kll_sketch_timing_profile::run() {
   delete [] values;
 }
 
-} /* namespace sketches */
+} /* namespace datasketches */
