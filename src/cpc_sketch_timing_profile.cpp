@@ -74,10 +74,9 @@ void cpc_sketch_timing_profile::run() {
     const auto finish_serialize(std::chrono::high_resolution_clock::now());
     serialize_time_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(finish_serialize - start_serialize);
 
-    std::unique_ptr<cpc_sketch> deserialized_sketches[num_trials]; // to exclude destructors from the deserialize timing
     const auto start_deserialize(std::chrono::high_resolution_clock::now());
     for (size_t i = 0; i < num_trials; i++) {
-      deserialized_sketches[i] = cpc_sketch::deserialize(s);
+      auto deserialized_sketch = cpc_sketch::deserialize(s);
     }
     const auto finish_deserialize(std::chrono::high_resolution_clock::now());
     deserialize_time_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(finish_deserialize - start_deserialize);
