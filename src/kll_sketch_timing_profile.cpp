@@ -4,6 +4,7 @@
  */
 
 #include "kll_sketch_timing_profile.h"
+#include "characterization_utils.h"
 
 #include <iostream>
 #include <algorithm>
@@ -14,15 +15,6 @@
 #include <kll_sketch.hpp>
 
 namespace datasketches {
-
-size_t pwr_2_law_next(size_t ppo, size_t cur_point);
-size_t count_points(size_t lg_start, size_t lg_end, size_t ppo);
-
-size_t get_num_trials(size_t x, size_t lg_min_x, size_t lg_max_x, size_t lg_min_trials, size_t lg_max_trials) {
-  const double slope((double) (lg_max_trials - lg_min_trials) / ((int) lg_min_x - (int) lg_max_x));
-  const double lg_trials((slope * log2(x)) + lg_max_trials);
-  return (size_t) pow(2, lg_trials);
-}
 
 void kll_sketch_timing_profile::run() {
   const size_t lg_min_stream_len(0);
