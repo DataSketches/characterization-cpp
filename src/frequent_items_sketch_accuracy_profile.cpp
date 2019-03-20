@@ -63,11 +63,8 @@ void frequent_items_sketch_accuracy_profile::run() {
       for (size_t j = 0; j < stream_length; j++) {
         frequencies[values[j]]++;
       }
-      //std::cout << "Epsilon: " << sketch.get_epsilon() << std::endl;
-      //std::cout << "Threshold: " << threshold << std::endl;
       std::unordered_map<unsigned, unsigned> frequent_items;
       for (auto it: frequencies) {
-        //std::cout << it.first << ": " << it.second << std::endl;
         if (it.second > threshold) frequent_items[it.first] = it.second;
       }
 
@@ -106,7 +103,6 @@ void frequent_items_sketch_accuracy_profile::run() {
 
       // all items of the exact solution must be in this set
       auto no_false_negatives = sketch.get_frequent_items(frequent_items_error_type::NO_FALSE_NEGATIVES);
-      //std::cout << "Num no_false_negatives: " << no_false_negatives.size() << std::endl;
       std::unordered_map<unsigned, unsigned> no_false_negatives_map;
       for (auto& it: no_false_negatives) no_false_negatives_map[it.get_item()] = it.get_estimate();
       for (auto& it: frequent_items) {
@@ -114,7 +110,6 @@ void frequent_items_sketch_accuracy_profile::run() {
           num_error_3++;
         }
       }
-      //return;
     }
     delete [] values;
 
