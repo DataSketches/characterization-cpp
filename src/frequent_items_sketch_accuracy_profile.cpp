@@ -15,17 +15,19 @@
 namespace datasketches {
 
 void frequent_items_sketch_accuracy_profile::run() {
+  const unsigned lg_num_sketches = 4; // merge if > 0 (more than 1 sketch)
+
   const unsigned lg_min_stream_len = 5;
   const unsigned lg_max_stream_len = 23;
-  const unsigned ppo = 16;
+  const unsigned ppo = (lg_num_sketches > 0) ? 1 : 16; // simple partitioning for merging relies on powers of 2
 
-  const unsigned lg_max_trials = 16;
-  const unsigned lg_min_trials = 8;
+  const unsigned lg_max_trials = 18;
+  const unsigned lg_min_trials = 10;
 
   const unsigned lg_max_sketch_size = 10;
 
   const unsigned zipf_lg_range = 13; // range: 8K values for 1K sketch
-  const double zipf_exponent = 1.1;
+  const double zipf_exponent = 0.7;
 
   zipf_distribution zipf(1 << zipf_lg_range, zipf_exponent);
 
@@ -52,8 +54,20 @@ void frequent_items_sketch_accuracy_profile::run() {
       }
 
       frequent_items_sketch<unsigned> sketch(lg_max_sketch_size);
-      for (size_t j = 0; j < stream_length; j++) {
-        sketch.update(values[j]);
+      if (lg_num_sketches == 0) {
+        for (size_t j = 0; j < stream_length; j++) {
+          sketch.update(values[j]);
+        }
+      } else {
+        // this partitioning relies on stream length being power of 2, so ppo must be 1
+        const unsigned substream_length = stream_length / (1 << lg_num_sketches);
+        for (size_t j = 0; j < (1 << lg_num_sketches); j++) {
+          frequent_items_sketch<unsigned> s(lg_max_sketch_size);
+          for (size_t k = 0; k < substream_length; k++) {
+            s.update(values[j * substream_length + k]);
+          }
+          sketch.merge(s);
+        }
       }
       num_items += sketch.get_num_active_items();
       max_error += sketch.get_maximum_error();

@@ -11,6 +11,7 @@
 #include "kll_merge_accuracy_profile.h"
 #include "cpc_sketch_timing_profile.h"
 #include "frequent_items_sketch_timing_profile.h"
+#include "frequent_items_sketch_accuracy_profile.h"
 
 int main(int argc, char **argv) {
   if (argc == 2) {
@@ -28,6 +29,9 @@ int main(int argc, char **argv) {
       profile.run();
     } else if (strcmp(argv[1], "fi-timing") == 0) {
       datasketches::frequent_items_sketch_timing_profile profile;
+      profile.run();
+    } else if (strcmp(argv[1], "fi-accuracy") == 0) {
+      datasketches::frequent_items_sketch_accuracy_profile profile;
       profile.run();
     } else {
       std::cerr << "Unsupported command " << argv[1] << std::endl;
