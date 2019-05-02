@@ -41,7 +41,7 @@ void frequent_items_sketch_timing_profile::run() {
   const unsigned lg_max_sketch_size = 10;
 
   const unsigned zipf_lg_range = 13; // range: 8K values for 1K sketch
-  const double zipf_exponent = 1;
+  const double zipf_exponent = 0.7;
   const double geom_p = 0.005;
 
   std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
@@ -75,8 +75,8 @@ void frequent_items_sketch_timing_profile::run() {
 
       // prepare values to exclude cost of random generator from the update loop
       for (size_t j = 0; j < stream_length; j++) {
-        values[j] = geometric_distribution(generator);
-        //values[j] = zipf.sample();
+        //values[j] = geometric_distribution(generator);
+        values[j] = zipf.sample();
       }
 
       const auto start_update(std::chrono::high_resolution_clock::now());
